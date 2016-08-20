@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/containous/flaeg"
+	_ "github.com/BurntSushi/toml"
 	"github.com/containous/staert"
 )
 
@@ -11,18 +12,34 @@ import (
 
 type DatabaseInfo struct {
 	Host string `description:"Hostname or IP address of postgresql server"`
-	Port string `description:"Port number"`
+	Port string `description:"database port number"`
+	Name string `description:"database name"`
+	Username string `description:"database username"`
+	Password string `description:"database password"`
+}
+
+type ListenInfo struct {
+	IP string `description:"IP Address to listen on"`
+	Port string `description:"listen on port number"`
 }
 
 type Configuration struct {
-	Db DatabaseInfo `description:"Database"`
+	Db *DatabaseInfo `description:"Database"`
+	Listen *ListenInfo `description:"Listen"`
 }
 
 func main() {
 	var config *Configuration = &Configuration{
-		DatabaseInfo{
+		&DatabaseInfo{
 			Host: "localhost",
 			Port: "5432",
+			Name: "mdmappsvc",
+			Username: "mdmappsvc",
+			Password: "mdmappsvc",
+		},
+		&ListenInfo{
+			IP: "0.0.0.0",
+			Port: "8080",
 		},
 	}
 
@@ -34,23 +51,36 @@ func main() {
 		Config: config,
 		DefaultPointersConfig: pointersConfig,
 		Run: func() error {
-			fmt.Printf("Run flaegtest command with config : %+v\n", config)
+			run(config)
 			return nil
 		},
 	}
 
-	st := staert.NewStaert(rootCmd)
-	toml := staert.NewTomlSource("mdmappsvc", []string{"./"})
 	fl := flaeg.New(rootCmd, os.Args[1:])
+	if _, err := fl.Parse(rootCmd); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
+
+	st := staert.NewStaert(rootCmd)
+	toml := staert.NewTomlSource("mdmappsvc", []string{"."})
 
 	st.AddSource(toml)
 	st.AddSource(fl)
-	loadedConfig, err := st.LoadConfig()
-	if err != nil {
+
+	if _, err := st.LoadConfig(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(-1)
 	}
 
+	if err := st.Run(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 
-	fmt.Printf("%#v\n", loadedConfig)
+	os.Exit(0)
+}
+
+func run(config *Configuration) {
+	fmt.Printf("%#v\n", config.Db)
 }
