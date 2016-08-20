@@ -1,0 +1,32 @@
+hash: 02f615ae77b5f4cb020ee931d17fa8b9de0db6d99fdf14ab281d56d6728822d0
+updated: 2016-08-20T21:30:16.421329047+10:00
+imports:
+- name: github.com/BurntSushi/toml
+  version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
+- name: github.com/containous/flaeg
+  version: a731c034dda967333efce5f8d276aeff11f8ff87
+- name: github.com/containous/staert
+  version: 044bdfee6c8f5e8fb71f70d5ba1cf4cb11a94e97
+- name: github.com/DavidHuie/gomigrate
+  version: 4004e6142040f5d622e9d2be6e833a4652741571
+- name: github.com/docker/libkv
+  version: aabc039ad04deb721e234f99cd1b4aa28ac71a40
+  subpackages:
+  - store
+- name: github.com/go-kit/kit
+  version: 6fb874ce59bb45b2f60ee3d289829db02142ecc6
+- name: github.com/gorilla/mux
+  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+- name: github.com/jmoiron/sqlx
+  version: 7396209bbeada6a4fcc28aa9408f89b2e71cac39
+- name: github.com/lib/pq
+  version: 80f8150043c80fb52dee6bc863a709cdac7ec8f8
+- name: github.com/Masterminds/squirrel
+  version: caff2d522d550f0998629c85898ad35e8a603328
+- name: github.com/mitchellh/mapstructure
+  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+- name: github.com/ogier/pflag
+  version: 32a05c62658bd1d7c7e75cbc8195de5d585fde0f
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+testImports: []

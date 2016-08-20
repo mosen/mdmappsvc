@@ -1,0 +1,18 @@
+package: github.com/mosen/appservice
+import:
+- package: github.com/containous/flaeg
+- package: github.com/containous/staert
+- package: github.com/go-kit/kit
+  version: ^0.2.0
+- package: github.com/gorilla/mux
+  version: ^1.1.0
+- package: github.com/jmoiron/sqlx
+- package: github.com/lib/pq
+- package: github.com/DavidHuie/gomigrate
+- package: github.com/Masterminds/squirrel
+- package: github.com/satori/go.uuid
+  version: ^1.1.0
+- package: github.com/ogier/pflag
+  version: ^0.0.1
+- package: github.com/BurntSushi/toml
+  version: ^0.2.0
