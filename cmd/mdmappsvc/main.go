@@ -14,6 +14,8 @@ import (
 	"github.com/mosen/mdmappsvc/source"
 	"golang.org/x/net/context"
 	"github.com/jmoiron/sqlx"
+	"os/signal"
+	"syscall"
 )
 
 
@@ -136,9 +138,21 @@ func run(config *Configuration) {
 	sourceHandler := source.MakeHTTPHandler(ctx, sourceSvc, log.NewContext(logger).With("component", "HTTP"))
 
 	mux := http.NewServeMux()
-	mux.Handle("/v1/", sourceHandler)
+	mux.Handle("/v1/sources/", sourceHandler)
 
 	portStr := fmt.Sprintf("%v:%v", config.Listen.IP, config.Listen.Port)
-	logger.Log("level", "info", "msg", "Listening on " + portStr)
-	http.ListenAndServe(portStr, nil)
+
+	errs := make(chan error)
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	go func() {
+		logger.Log("level", "info", "msg", "Listening on " + portStr)
+		errs <- http.ListenAndServe(portStr, mux)
+	}()
+
+	logger.Log("exit", <-errs)
 }

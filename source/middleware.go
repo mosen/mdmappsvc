@@ -27,22 +27,22 @@ func (mw *loggingMiddleware) PostSource(ctx context.Context, s *Source) error {
 }
 
 func (mw *loggingMiddleware) GetSource(ctx context.Context, uuidStr string) (Source, error) {
-	mw.logger.Log("method", "GetSource")
+	mw.logger.Log("method", "GetSource", "uuid", uuidStr)
 	return mw.next.GetSource(ctx, uuidStr)
 }
 
 func (mw *loggingMiddleware) PutSource(ctx context.Context, uuidStr string, s *Source) error {
-	mw.logger.Log("method", "PutSource")
+	mw.logger.Log("method", "PutSource", "uuid", uuidStr)
 	return mw.next.PutSource(ctx, uuidStr, s)
 }
 
 func (mw *loggingMiddleware) PatchSource(ctx context.Context, uuidStr string, s *Source) error {
-	mw.logger.Log("method", "PatchSource")
+	mw.logger.Log("method", "PatchSource", "uuid", uuidStr)
 	return mw.next.PatchSource(ctx, uuidStr, s)
 }
 
 func (mw *loggingMiddleware) DeleteSource(ctx context.Context, uuidStr string) error {
-	mw.logger.Log("method", "DeleteSource")
+	mw.logger.Log("method", "DeleteSource", "uuid", uuidStr)
 	return mw.next.DeleteSource(ctx, uuidStr)
 }
 

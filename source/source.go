@@ -6,6 +6,6 @@ import (
 
 type Source struct {
 	UUID uuid.UUID `json:"uuid" db:"uuid"`
-	typeUUID uuid.UUID `json:"type_uuid" db:"type_uuid"`
-
+	TypeUUID uuid.UUID `json:"type_uuid" db:"type_uuid"`
+	PublicURI string `json:"public_uri" db:"public_uri"`
 }

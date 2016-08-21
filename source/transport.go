@@ -21,7 +21,7 @@ func MakeHTTPHandler(ctx context.Context, s Service, logger log.Logger) http.Han
 
 	// GET		/sources/	get a list of all package sources
 	// POST		/sources/	create a package source
-	r.Methods("GET").Path("/sources").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/v1/sources/").Handler(httptransport.NewServer(
 		ctx,
 		e.GetSourcesEndpoint,
 		decodeGetSourcesRequest,
@@ -29,7 +29,7 @@ func MakeHTTPHandler(ctx context.Context, s Service, logger log.Logger) http.Han
 		options...,
 	))
 
-	r.Methods("POST").Path("/sources").Handler(httptransport.NewServer(
+	r.Methods("POST").Path("/v1/sources/").Handler(httptransport.NewServer(
 		ctx,
 		e.PostSourceEndpoint,
 		decodePostSourceRequest,
@@ -49,11 +49,12 @@ func decodePostSourceRequest(_ context.Context, r *http.Request) (request interf
 }
 
 func decodeGetSourcesRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req getSourcesRequest
-	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
-		return nil, e
-	}
-	return req, nil
+	//var req getSourcesRequest
+	//if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+	//	return nil, e
+	//}
+	//return req, nil
+	return nil, nil
 }
 
 

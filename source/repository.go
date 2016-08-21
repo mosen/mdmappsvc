@@ -56,7 +56,7 @@ func (r *sourceRepository) Store(source *Source) error {
 		"type_uuid",
 	).
 		Values(
-		source.typeUUID.String(),
+		source.TypeUUID.String(),
 	).
 		Suffix("RETURNING \"uuid\"").
 		PlaceholderFormat(sq.Dollar).
@@ -90,7 +90,7 @@ func (r *sourceRepository) Delete(uuid uuid.UUID) error {
 func (r *sourceRepository) Update(source *Source) error {
 	stmt := sq.Update("sources").SetMap(
 		sq.Eq{
-			"type_uuid": source.typeUUID.String(),
+			"type_uuid": source.TypeUUID.String(),
 		},
 	).Where(sq.Eq{"uuid": source.UUID.String()})
 
