@@ -13,6 +13,7 @@ type Service interface {
 	PutSource(ctx context.Context, uuidStr string, s *Source) error
 	PatchSource(ctx context.Context, uuidStr string, s *Source) error
 	DeleteSource(ctx context.Context, uuidStr string) error
+	GetSources(ctx context.Context) ([]Source, error)
 }
 
 var (
@@ -78,4 +79,8 @@ func (svc *service) DeleteSource(ctx context.Context, uuidStr string) error {
 	} else {
 		return nil
 	}
+}
+
+func (svc *service) GetSources(ctx context.Context) ([]Source, error) {
+	return svc.store.FindAll()
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"encoding/json"
+	"bytes"
+	"io/ioutil"
 )
 
 func MakeHTTPHandler(ctx context.Context, s Service, logger log.Logger) http.Handler {
@@ -17,7 +19,16 @@ func MakeHTTPHandler(ctx context.Context, s Service, logger log.Logger) http.Han
 		httptransport.ServerErrorEncoder(encodeError),
 	}
 
+	// GET		/sources/	get a list of all package sources
 	// POST		/sources/	create a package source
+	r.Methods("GET").Path("/sources").Handler(httptransport.NewServer(
+		ctx,
+		e.GetSourcesEndpoint,
+		decodeGetSourcesRequest,
+		encodeResponse,
+		options...,
+	))
+
 	r.Methods("POST").Path("/sources").Handler(httptransport.NewServer(
 		ctx,
 		e.PostSourceEndpoint,
@@ -37,6 +48,14 @@ func decodePostSourceRequest(_ context.Context, r *http.Request) (request interf
 	return req, nil
 }
 
+func decodeGetSourcesRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req getSourcesRequest
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
+		return nil, e
+	}
+	return req, nil
+}
+
 
 type errorer interface {
 	error() error
@@ -51,6 +70,16 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
+}
+
+func encodeRequest(_ context.Context, req *http.Request, request interface{}) error {
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(request)
+	if err != nil {
+		return err
+	}
+	req.Body = ioutil.NopCloser(&buf)
+	return nil
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
@@ -81,4 +110,28 @@ func codeFrom(err error) int {
 		}
 		return http.StatusInternalServerError
 	}
+}
+
+//// CLIENT
+
+func encodePostSourceRequest(ctx context.Context, req *http.Request, request interface{}) error {
+	req.Method, req.URL.Path = "POST", "/v1/sources/"
+	return encodeRequest(ctx, req, request)
+}
+
+func decodePostSourceResponse(_ context.Context, resp *http.Response) (interface{}, error) {
+	var response postSourceResponse
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	return response, err
+}
+
+func encodeGetSourcesRequest(ctx context.Context, req *http.Request, request interface{}) error {
+	req.Method, req.URL.Path = "GET", "/v1/sources/"
+	return encodeRequest(ctx, req, request)
+}
+
+func decodeGetSourcesResponse(_ context.Context, resp *http.Response) (interface{}, error) {
+	var response getSourcesResponse
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	return response, err
 }

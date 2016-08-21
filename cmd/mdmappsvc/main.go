@@ -10,7 +10,6 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/term"
 	"github.com/DavidHuie/gomigrate"
 	"github.com/mosen/mdmappsvc/source"
 	"golang.org/x/net/context"
@@ -34,7 +33,7 @@ type ListenInfo struct {
 }
 
 type Configuration struct {
-	Db *DatabaseInfo `description:"Database"`
+	Db *DatabaseInfo `description:"Database connection options"`
 	Listen *ListenInfo `description:"Listen"`
 }
 
@@ -94,7 +93,11 @@ func main() {
 func run(config *Configuration) {
 	var err error
 	var db *sql.DB
-	logger := getLogger()
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
+	}
 
 	db, err = sql.Open("postgres", fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -129,40 +132,13 @@ func run(config *Configuration) {
 
 	sourceRepo := source.NewRepository(dbx, logger)
 	sourceSvc := source.NewService(sourceRepo, logger)
-	sourceHandler := source.MakeHTTPHandler(ctx, sourceSvc, logger)
+	sourceSvc = source.LoggingMiddleware(log.NewContext(logger).With("component", "source.Service"))(sourceSvc)
+	sourceHandler := source.MakeHTTPHandler(ctx, sourceSvc, log.NewContext(logger).With("component", "HTTP"))
 
 	mux := http.NewServeMux()
 	mux.Handle("/v1/", sourceHandler)
 
 	portStr := fmt.Sprintf("%v:%v", config.Listen.IP, config.Listen.Port)
+	logger.Log("level", "info", "msg", "Listening on " + portStr)
 	http.ListenAndServe(portStr, nil)
-}
-
-func getLogger() log.Logger {
-	colorFn := func(keyvals ...interface{}) term.FgBgColor {
-		for i := 0; i < len(keyvals)-1; i += 2 {
-			if keyvals[i] != "level" {
-				continue
-			}
-			switch keyvals[i+1] {
-			case "debug":
-				return term.FgBgColor{Fg: term.DarkGray}
-			case "info":
-				return term.FgBgColor{Fg: term.Gray}
-			case "warn":
-				return term.FgBgColor{Fg: term.Yellow}
-			case "error":
-				return term.FgBgColor{Fg: term.Red}
-			case "crit":
-				return term.FgBgColor{Fg: term.Gray, Bg: term.DarkRed}
-			default:
-				return term.FgBgColor{}
-			}
-		}
-		return term.FgBgColor{}
-	}
-
-	writer := term.NewColorWriter(os.Stdout)
-	logger := term.NewColorLogger(writer, log.NewLogfmtLogger, colorFn)
-	return logger
 }
