@@ -47,6 +47,7 @@ func main() {
 			Name: "mdmappsvc",
 			Username: "mdmappsvc",
 			Password: "mdmappsvc",
+			SSLMode: "disable",
 		},
 		&ListenInfo{
 			IP: "0.0.0.0",
