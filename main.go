@@ -3,9 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"net/http"
 	"github.com/containous/flaeg"
 	_ "github.com/BurntSushi/toml"
 	"github.com/containous/staert"
+	"database/sql"
+	_ "github.com/lib/pq"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/term"
+	"github.com/DavidHuie/gomigrate"
+	"github.com/mosen/mdmappsvc/source"
+	"golang.org/x/net/context"
+	"github.com/jmoiron/sqlx"
 )
 
 
@@ -16,6 +25,7 @@ type DatabaseInfo struct {
 	Name string `description:"database name"`
 	Username string `description:"database username"`
 	Password string `description:"database password"`
+	SSLMode string `description:"postgres SSL mode"`
 }
 
 type ListenInfo struct {
@@ -82,5 +92,77 @@ func main() {
 }
 
 func run(config *Configuration) {
-	fmt.Printf("%#v\n", config.Db)
+	var err error
+	var db *sql.DB
+	logger := getLogger()
+
+	db, err = sql.Open("postgres", fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		config.Db.Host,
+		config.Db.Port,
+		config.Db.Username,
+		config.Db.Password,
+		config.Db.Name,
+	))
+	if err != nil {
+		logger.Log("level", "error", "msg", err)
+		os.Exit(-1)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		logger.Log("level", "error", "msg", err)
+		os.Exit(-1)
+	}
+
+	var dbx *sqlx.DB = sqlx.NewDb(db, "postgres")
+
+	migrator, _ := gomigrate.NewMigrator(db, gomigrate.Postgres{}, "./migrations")
+	migrationErr := migrator.Migrate()
+
+	if migrationErr != nil {
+		logger.Log("level", "error", "msg", err)
+		os.Exit(-1)
+	}
+
+	ctx := context.Background()
+
+	sourceRepo := source.NewRepository(dbx, logger)
+	sourceSvc := source.NewService(sourceRepo, logger)
+	sourceHandler := source.MakeHTTPHandler(ctx, sourceSvc, logger)
+
+	mux := http.NewServeMux()
+	mux.Handle("/v1/", sourceHandler)
+
+	portStr := fmt.Sprintf("%v:%v", config.Listen.IP, config.Listen.Port)
+	http.ListenAndServe(portStr, nil)
+}
+
+func getLogger() log.Logger {
+	colorFn := func(keyvals ...interface{}) term.FgBgColor {
+		for i := 0; i < len(keyvals)-1; i += 2 {
+			if keyvals[i] != "level" {
+				continue
+			}
+			switch keyvals[i+1] {
+			case "debug":
+				return term.FgBgColor{Fg: term.DarkGray}
+			case "info":
+				return term.FgBgColor{Fg: term.Gray}
+			case "warn":
+				return term.FgBgColor{Fg: term.Yellow}
+			case "error":
+				return term.FgBgColor{Fg: term.Red}
+			case "crit":
+				return term.FgBgColor{Fg: term.Gray, Bg: term.DarkRed}
+			default:
+				return term.FgBgColor{}
+			}
+		}
+		return term.FgBgColor{}
+	}
+
+	writer := term.NewColorWriter(os.Stdout)
+	logger := term.NewColorLogger(writer, log.NewLogfmtLogger, colorFn)
+	return logger
 }
