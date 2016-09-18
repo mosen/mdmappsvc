@@ -1,56 +1,54 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"net/http"
-	"github.com/containous/flaeg"
-	_ "github.com/BurntSushi/toml"
-	"github.com/containous/staert"
 	"database/sql"
-	_ "github.com/lib/pq"
-	"github.com/go-kit/kit/log"
+	"fmt"
+	_ "github.com/BurntSushi/toml"
 	"github.com/DavidHuie/gomigrate"
+	"github.com/containous/flaeg"
+	"github.com/containous/staert"
+	"github.com/go-kit/kit/log"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/mosen/mdmappsvc/source"
 	"golang.org/x/net/context"
-	"github.com/jmoiron/sqlx"
+	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 )
 
-
-
 type DatabaseInfo struct {
-	Host string `description:"Hostname or IP address of postgresql server"`
-	Port string `description:"database port number"`
-	Name string `description:"database name"`
+	Host     string `description:"Hostname or IP address of postgresql server"`
+	Port     string `description:"database port number"`
+	Name     string `description:"database name"`
 	Username string `description:"database username"`
 	Password string `description:"database password"`
-	SSLMode string `description:"postgres SSL mode"`
+	SSLMode  string `description:"postgres SSL mode"`
 }
 
 type ListenInfo struct {
-	IP string `description:"IP Address to listen on"`
+	IP   string `description:"IP Address to listen on"`
 	Port string `description:"listen on port number"`
 }
 
 type Configuration struct {
-	Db *DatabaseInfo `description:"Database connection options"`
-	Listen *ListenInfo `description:"Listen"`
+	Db     *DatabaseInfo `description:"Database connection options"`
+	Listen *ListenInfo   `description:"Listen"`
 }
 
 func main() {
 	var config *Configuration = &Configuration{
 		&DatabaseInfo{
-			Host: "localhost",
-			Port: "5432",
-			Name: "mdmappsvc",
+			Host:     "localhost",
+			Port:     "5432",
+			Name:     "mdmappsvc",
 			Username: "mdmappsvc",
 			Password: "mdmappsvc",
-			SSLMode: "disable",
+			SSLMode:  "disable",
 		},
 		&ListenInfo{
-			IP: "0.0.0.0",
+			IP:   "0.0.0.0",
 			Port: "8080",
 		},
 	}
@@ -58,9 +56,9 @@ func main() {
 	var pointersConfig *Configuration = &Configuration{}
 
 	rootCmd := &flaeg.Command{
-		Name: "mdmappsvc",
-		Description: "MDM app service stores information about apps that may be installed on an MDM client.",
-		Config: config,
+		Name:                  "mdmappsvc",
+		Description:           "MDM app service stores information about apps that may be installed on an MDM client.",
+		Config:                config,
 		DefaultPointersConfig: pointersConfig,
 		Run: func() error {
 			run(config)
@@ -151,7 +149,7 @@ func run(config *Configuration) {
 	}()
 
 	go func() {
-		logger.Log("level", "info", "msg", "Listening on " + portStr)
+		logger.Log("level", "info", "msg", "Listening on "+portStr)
 		errs <- http.ListenAndServe(portStr, mux)
 	}()
 

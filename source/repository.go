@@ -1,10 +1,10 @@
 package source
 
 import (
-	"github.com/satori/go.uuid"
-	"github.com/jmoiron/sqlx"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/go-kit/kit/log"
+	"github.com/jmoiron/sqlx"
+	"github.com/satori/go.uuid"
 )
 
 type SourceRepository interface {
@@ -53,11 +53,11 @@ func (r *sourceRepository) FindAll() ([]Source, error) {
 func (r *sourceRepository) Store(source *Source) error {
 	query, args, err := sq.Insert("sources").
 		Columns(
-		"type_uuid",
-	).
+			"type_uuid",
+		).
 		Values(
-		source.TypeUUID.String(),
-	).
+			source.TypeUUID.String(),
+		).
 		Suffix("RETURNING \"uuid\"").
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

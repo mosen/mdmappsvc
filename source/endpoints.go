@@ -2,10 +2,10 @@ package source
 
 import (
 	"github.com/go-kit/kit/endpoint"
-	"golang.org/x/net/context"
-	"strings"
-	"net/url"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"golang.org/x/net/context"
+	"net/url"
+	"strings"
 )
 
 type Endpoints struct {
@@ -37,8 +37,8 @@ func MakeClientEndpoints(instance string) (Endpoints, error) {
 	options := []httptransport.ClientOption{}
 
 	return Endpoints{
-		PostSourceEndpoint:   httptransport.NewClient("POST", tgt, encodePostSourceRequest, decodePostSourceResponse, options...).Endpoint(),
-		GetSourcesEndpoint:   httptransport.NewClient("GET", tgt, encodeGetSourcesRequest, decodeGetSourcesResponse, options...).Endpoint(),
+		PostSourceEndpoint: httptransport.NewClient("POST", tgt, encodePostSourceRequest, decodePostSourceResponse, options...).Endpoint(),
+		GetSourcesEndpoint: httptransport.NewClient("GET", tgt, encodeGetSourcesRequest, decodeGetSourcesResponse, options...).Endpoint(),
 	}, nil
 }
 
@@ -104,8 +104,6 @@ func (e Endpoints) GetSources(ctx context.Context) ([]Source, error) {
 	return resp.Sources, resp.Err
 }
 
-
-
 //// SERVER
 
 func MakePostSourceEndpoint(s Service) endpoint.Endpoint {
@@ -140,13 +138,13 @@ type getSourceRequest struct {
 
 type getSourceResponse struct {
 	Source Source `json:"source,omitempty"`
-	Err error `json:"err,omitempty"`
+	Err    error  `json:"err,omitempty"`
 }
 
 func (r getSourceResponse) error() error { return r.Err }
 
 type putSourceRequest struct {
-	UUID string
+	UUID   string
 	Source Source
 }
 
@@ -157,7 +155,7 @@ type putSourceResponse struct {
 func (r putSourceResponse) error() error { return r.Err }
 
 type patchSourceRequest struct {
-	UUID string
+	UUID   string
 	Source Source
 }
 
@@ -177,11 +175,11 @@ type deleteSourceResponse struct {
 
 func (r deleteSourceResponse) error() error { return r.Err }
 
-type getSourcesRequest struct {}
+type getSourcesRequest struct{}
 
 type getSourcesResponse struct {
 	Sources []Source `json:"sources,omitempty"`
-	Err error `json:"err,omitempty"`
+	Err     error    `json:"err,omitempty"`
 }
 
 func (r getSourcesResponse) error() error { return r.Err }

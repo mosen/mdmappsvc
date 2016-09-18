@@ -2,26 +2,23 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"github.com/containous/flaeg"
 	_ "github.com/BurntSushi/toml"
+	"github.com/containous/flaeg"
 	"github.com/containous/staert"
-	_ "github.com/lib/pq"
 	"github.com/go-kit/kit/log"
+	_ "github.com/lib/pq"
 	"github.com/mosen/mdmappsvc/client"
 	"golang.org/x/net/context"
+	"os"
 )
-
-
-
 
 type Configuration struct {
 	URL string `description:"URL of the mdmappsvc"`
 }
 
 type SourcesConfiguration struct {
-	URL string `description:"URL of the mdmappsvc"`
-	List bool `description:"List sources"`
+	URL  string `description:"URL of the mdmappsvc"`
+	List bool   `description:"List sources"`
 }
 
 func main() {
@@ -32,9 +29,9 @@ func main() {
 	var pointersConfig *Configuration = &Configuration{}
 
 	rootCmd := &flaeg.Command{
-		Name: "mdmappcli",
-		Description: "MDM app service client",
-		Config: config,
+		Name:                  "mdmappcli",
+		Description:           "MDM app service client",
+		Config:                config,
 		DefaultPointersConfig: pointersConfig,
 		Run: func() error {
 			run(config)
@@ -43,14 +40,14 @@ func main() {
 	}
 
 	var srcConfig *SourcesConfiguration = &SourcesConfiguration{
-		URL: "http://localhost:8080/",
+		URL:  "http://localhost:8080/",
 		List: false,
 	}
 	var srcPointersConfig *SourcesConfiguration = &SourcesConfiguration{}
 	sourcesCmd := &flaeg.Command{
-		Name: "sources",
-		Description: "Read and write application sources",
-		Config: srcConfig,
+		Name:                  "sources",
+		Description:           "Read and write application sources",
+		Config:                srcConfig,
 		DefaultPointersConfig: srcPointersConfig,
 		Run: func() error {
 			runSources(srcConfig)
@@ -98,7 +95,6 @@ func run(config *Configuration) {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
-
 
 }
 

@@ -1,14 +1,14 @@
 package source
 
 import (
-	"net/http"
-	"golang.org/x/net/context"
-	"github.com/gorilla/mux"
+	"bytes"
+	"encoding/json"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
-	"encoding/json"
-	"bytes"
+	"github.com/gorilla/mux"
+	"golang.org/x/net/context"
 	"io/ioutil"
+	"net/http"
 )
 
 func MakeHTTPHandler(ctx context.Context, s Service, logger log.Logger) http.Handler {
@@ -56,7 +56,6 @@ func decodeGetSourcesRequest(_ context.Context, r *http.Request) (request interf
 	//return req, nil
 	return nil, nil
 }
-
 
 type errorer interface {
 	error() error

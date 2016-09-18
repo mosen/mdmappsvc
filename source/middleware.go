@@ -1,8 +1,8 @@
 package source
 
 import (
-	"golang.org/x/net/context"
 	"github.com/go-kit/kit/log"
+	"golang.org/x/net/context"
 )
 
 type Middleware func(Service) Service
@@ -10,14 +10,14 @@ type Middleware func(Service) Service
 func LoggingMiddleware(logger log.Logger) Middleware {
 	return func(next Service) Service {
 		return &loggingMiddleware{
-			next: next,
+			next:   next,
 			logger: logger,
 		}
 	}
 }
 
 type loggingMiddleware struct {
-	next Service
+	next   Service
 	logger log.Logger
 }
 
